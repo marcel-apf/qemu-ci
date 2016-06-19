@@ -29,6 +29,7 @@ How it works
 - For each CI test a new Jenkins project is to be created and have the path to mbox file,
   series id and series revision as parameters.
 - The Jenkins project runs a single bash script 'qemu-build.sh' which is a wrapper to 'qemu-build.py'.
+  (See exported configuration jenkins-qemu-checkpatch.xml)
 - See jenkinsq.py to see how the build is triggered.
 - 'poll-patchwork.py' script waits until the build is finished and updates Pathwork with the
   build results.
