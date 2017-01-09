@@ -28,7 +28,7 @@ class JenkinsBuild(object):
     def start(self):
         next_build_number = self.server.get_job_info(self.project_name)['nextBuildNumber']
         output = self.server.build_job(self.project_name,
-                                       { 'mbox_path':       self.series.mbox_path,
+                                       {
                                          'series_subject':  self.series.subject,
                                          'series_id':       self.series.sid,
                                          'series_revision': self.series.revision
@@ -48,9 +48,9 @@ class JenkinsBuild(object):
                         continue;
                     build_parameters = build_action.get('parameters')
                     for build_parameter in build_parameters:
-                        if not build_parameter.get('name') == 'mbox_path':
+                        if not build_parameter.get('name') == 'series_id':
                             continue;
-                        if build_parameter.get('value') == self.series.mbox_path:
+                        if int(build_parameter.get('value')) == self.series.sid:
                             self.build = build_info
                             break;
 

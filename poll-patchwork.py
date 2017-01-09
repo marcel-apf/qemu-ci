@@ -10,6 +10,20 @@ import jenkinsq
 import patchworkq
 import commonq
 
+class GitAmTest(commonq.Test):
+    def __init__(self):
+        commonq.Test.__init__(self, 'git-am')
+        self.build = None
+
+    def process_patch(self, series):
+        self.build = jenkinsq.JenkinsBuild('QEMU-git-am', series)
+        self.build.start()
+        self.build.wait()
+
+        self.state = commonq.TestState.SUCCESS if self.build.succeded() else commonq.TestState.FAILURE
+        self.summary = self.build.description()
+        self.url = self.build.url()
+
 class CheckpatchTest(commonq.Test):
     def __init__(self):
         commonq.Test.__init__(self, 'checkpatch')
@@ -20,7 +34,7 @@ class CheckpatchTest(commonq.Test):
         self.build.start()
         self.build.wait()
 
-        self.state = commonq.TestState.SUCCESS if self.build.succeded() else commonq.TestState.FAILURE
+        self.state = commonq.TestState.SUCCESS if self.build.succeded() else commonq.TestState.WARNING
         self.summary = self.build.description()
         self.url = self.build.url()
 
@@ -29,11 +43,16 @@ class TestRunner(object):
         sid = event['series']
         revision = event['parameters']['revision']
 
-        test = CheckpatchTest()
-        print('== Running %s on series %d v%d' % (test.name, sid, revision))
-
         series_pw = patchworkq.PatchworkSeries(sid, revision)
         series_pw.load();
+
+        test = CheckpatchTest()
+        print('== Running %s on series %d v%d' % (test.name, sid, revision))
+        test.process_patch(series_pw)
+        series_pw.post_test_result(test)
+
+        test = GitAmTest()
+        print('== Running %s on series %d v%d' % (test.name, sid, revision))
         test.process_patch(series_pw)
         series_pw.post_test_result(test)
 

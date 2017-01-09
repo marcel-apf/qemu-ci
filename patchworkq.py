@@ -37,12 +37,22 @@ class PatchworkSeries(commonq.Series):
         self._query_mbox_path()
         self._query_subject()
 
+    def git_am(self):
+        cmd = subprocess.Popen([GIT_PW, '-C', QEMU_PATH,
+                                'apply', str(self.sid),
+                               '--revision', str(self.revision)],
+                               stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT)
+        (stdout, _) = cmd.communicate()
+        return (cmd.returncode, stdout)
+
     def post_test_result(self, test):
         cmd = subprocess.Popen([GIT_PW, '-C', QEMU_PATH, 'post-result', str(self.sid),
                                 '--revision', str(self.revision),
                                 test.name, self.state_names[test.state],
                                 '--summary', test.summary,
                                 '--url', test.url])
-        cmd.wait();
+        cmd.wait()
+
 
 
